@@ -17,7 +17,7 @@ using namespace std;
 int PRECISION = 1e4;            // Точность 1eX, где X - Сколько знаков учитывать в энергии после запятой
                                 // (1e0 - 0 знаков после запятой (для модели Изинга), 1e100 - 100 знаков после запятой)
 
-unsigned N;              // number of spins in the lattice
+unsigned N;                     // number of spins in the lattice
 
 signed char *spins;             //массив направления спинов. По умолчанию +1. n - число считанных спинов (число незакомментированных строк в csv-файле).
 unsigned short *a_neighbours;   //число соседей каждого спина. Считается как число энергий в соответствующей строке в csv-файле.
@@ -45,8 +45,8 @@ char *zeros;
 
 double  eNew, eOld,
         mNew, mOld,
-        mxOld, mxNew,
-        myOld, myNew;
+        mxNew, mxOld,
+        myNew, myOld;
 
 
 /// Функция чтения файла с энергиями
@@ -119,7 +119,7 @@ int readCSV(char *filename){
     int energyNum=0;            //holds actual count of previously parsed energies
     eOld = 0;
     emax = 0;                   // сумма всех взаимодействий с положительным знаком
-    long long eTemp=0;
+    //long long eTemp=0;
 
     do {
         c = fgetc(file);
@@ -130,7 +130,7 @@ int readCSV(char *filename){
                 neighbours[energyNum] = col;
                 
                 energies[energyNum] = parsedNumber;
-                eTemp+=round(parsedNumber*10000000);
+                //eTemp+=round(parsedNumber*10000000);
                 emax += fabs(parsedNumber);
 
                 numInSymb=0;
@@ -158,7 +158,7 @@ int readCSV(char *filename){
     } while (c != EOF);
 
     emax/=2;
-    eOld=eTemp/20000000.;
+    //eOld=eTemp/20000000.;
     emax= ((double)ceil(emax * PRECISION)) / PRECISION; // округляем значение максимальной энергии до знака точности, в большую сторону
     emin = -emax;
 
@@ -248,6 +248,15 @@ int read_mx_my(char *filename){
 
     fclose(file);
 
+    double summx = 0, summy = 0;
+    for(int i=0; i<count_n; i++){
+        summx += fabs(mx[i]);
+        summy += fabs(my[i]);
+    }
+    mmax = (int)sqrt(summx*summx+summy*summy)+1;
+    //cout << "mmaxTemp = " << mmaxTemp << endl;
+    mmin = -mmax;
+
     return 1;
 }
 
@@ -296,7 +305,7 @@ void dump(){
     ostringstream fname;
     fname<<"dump_"<<N<<"_"<<rseed<<"_"<<k<<".dat";
     ofstream file(fname.str());
-    file<<"# WL calculations for 2D spins on flat square lattice"<<endl;
+    file<<"# WL calculations for 2D spins on flat honeycomb lattice"<<endl;
     file<<"# with dipolar interaction"<<endl;
     file<<"# random seed="<<rseed<<endl;
     file<<"# bins number="<<DOSSIZE1<<" , "<<DOSSIZE2<<endl;
@@ -307,12 +316,12 @@ void dump(){
         for (unsigned long num2=0; num2<DOSSIZE2; ++num2){
             if (zeros[num1*DOSSIZE2+num2]){
                 file<<
-                    num1<<"\t"<<
-                    num2<<"\t"<<
-                    g->xrange[num1]<<"\t"<<
-                    g->yrange[num2]<<"\t"<<
-                    g->bin[num1*DOSSIZE2+num2]<<"\t"<<
-                    h[num1*DOSSIZE2+num2]<<endl;
+                    num1<<"\t"<<//
+                    num2<<"\t"<<//
+                    g->xrange[num1]<<"\t"<<//energy
+                    g->yrange[num2]<<"\t"<<//magnetization
+                    g->bin[num1*DOSSIZE2+num2]<<"\t"<<//
+                    h[num1*DOSSIZE2+num2]<<endl;//--
             }
         }
     }
@@ -389,10 +398,11 @@ int main(int argc, char *argv[])
     readCSV("new_csv.csv");
     read_mx_my("mx_my.csv");
 
+    //DOSSIZE1 = (int)(emax-emin)+1;
     DOSSIZE1 = (int)((emax-emin)*PRECISION)+1;
 
-    mmax = (N+1);
-    mmin = (-N-1);
+    //mmax = (N+1);
+    //mmin = (-N-1);
     DOSSIZE2 = mmax-mmin;
 
     h = (unsigned *) malloc(DOSSIZE1*DOSSIZE2*sizeof(unsigned));
@@ -433,6 +443,7 @@ int main(int argc, char *argv[])
 
             rotate(partNum);//получаем eNew, mNew
 
+            //cout << "eNew = " << eNew << endl;
             gsl_histogram2d_find(g,eNew,mNew,&newEIdx,&newMIdx);
 
             if (uniform02(generator) <= exp(g->bin[oldEIdx*DOSSIZE2+oldMIdx]-g->bin[newEIdx*DOSSIZE2+newMIdx])) {
@@ -446,6 +457,8 @@ int main(int argc, char *argv[])
                 ++accepted;
             } else {
                 spins[partNum] *= -1;
+                mx[partNum] *= -1;
+                my[partNum] *= -1;
                 ++rejected;
             }
 
