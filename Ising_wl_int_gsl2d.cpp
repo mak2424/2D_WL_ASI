@@ -308,20 +308,24 @@ void dump(){
     file<<"# WL calculations for 2D spins on flat honeycomb lattice"<<endl;
     file<<"# with dipolar interaction"<<endl;
     file<<"# random seed="<<rseed<<endl;
-    file<<"# bins number="<<DOSSIZE1<<" , "<<DOSSIZE2<<endl;
-    file<<"# emin , emax = "<<emin<<" , "<<emax<<endl;
-    file<<"# mmin , mmax = "<<mmin<<" , "<<mmax<<endl;
+    file<<"# bins number E ="<<DOSSIZE1<<endl;
+    file<<"# bins number M ="<<DOSSIZE2<<endl;
+    file<<"# emin = "<<emin<<", emax = "<<emax<<endl;
+    file<<"# mmin = "<<mmin<<", mmax = "<<mmax<<endl;
+
+    file<<"#\n# E\tM\tlog(P(g))"<<endl;
 
     for (unsigned long num1=0; num1<DOSSIZE1; ++num1){
         for (unsigned long num2=0; num2<DOSSIZE2; ++num2){
             if (zeros[num1*DOSSIZE2+num2]){
                 file<<
-                    num1<<"\t"<<//
-                    num2<<"\t"<<//
+                    //num1<<"\t"<<//номер энергии в ДОС
+                    //num2<<"\t"<<//номер намагниченности в ДОС
                     g->xrange[num1]<<"\t"<<//energy
                     g->yrange[num2]<<"\t"<<//magnetization
-                    g->bin[num1*DOSSIZE2+num2]<<"\t"<<//
-                    h[num1*DOSSIZE2+num2]<<endl;//--
+                    g->bin[num1*DOSSIZE2+num2]<<//логарифм от вероятности g
+                    //<<"\t"<<h[num1*DOSSIZE2+num2]<<
+                    endl;//--
             }
         }
     }
