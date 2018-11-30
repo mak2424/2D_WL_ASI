@@ -1,0 +1,20 @@
+[header]
+version=2
+dimensions=2
+type=standart
+size=6
+emin=0
+emax=0
+state=000000
+minstate=
+maxstate=
+interactionrange=0
+sizescale=1
+magnetizationscale=1
+[parts]
+0	0.866025	-0.75	0	-0.866025	0.5	0	0	
+1	1.73205	-0.75	0	0.866025	0.5	0	0	
+2	0.866025	0.75	0	0.866025	0.5	0	0	
+3	1.73205	0.75	0	-0.866025	0.5	0	0	
+4	0.433013	0	0	0	1	0	0	
+5	2.16506	0	0	0	1	0	0
